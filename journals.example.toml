@@ -1,0 +1,7 @@
+[[journals]]
+key = "ieee-tcyb"
+name = "IEEE TCYB"
+platform = "scholarone"
+url = "https://mc.manuscriptcentral.com/cyb-ieee"
+username_env = "TCYB_USERNAME"
+password_env = "TCYB_PASSWORD"
