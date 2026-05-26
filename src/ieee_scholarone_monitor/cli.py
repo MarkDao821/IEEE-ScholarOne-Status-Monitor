@@ -137,6 +137,7 @@ def run_check(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="ieee-scholarone-monitor")
     parser.add_argument("--debug", action="store_true", help="Run browser visibly and save diagnostics")
+    parser.add_argument("--dump", action="store_true", help="Save successful page HTML, screenshot, and table rows")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("test", help="Send a WeChat test notification")
     subparsers.add_parser("check", help="Run normal status check")
@@ -155,8 +156,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "test":
         return run_test_notification(config)
     if args.command == "check":
-        return run_check(config, debug=args.debug)
+        return run_check(config, debug=args.debug or args.dump)
     if args.command == "report":
-        return run_check(config, debug=args.debug, force_report=True)
+        return run_check(config, debug=args.debug or args.dump, force_report=True)
     parser.error(f"Unsupported command: {args.command}")
     return 2

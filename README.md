@@ -69,6 +69,14 @@ Run visibly for login/debugging:
 .\.venv\Scripts\python.exe -m ieee_scholarone_monitor --debug check
 ```
 
+Save successful page diagnostics without changing the normal workflow:
+
+```powershell
+.\.venv\Scripts\python.exe run_monitor.py --dump report
+```
+
+This writes a screenshot, redacted HTML, and parsed table rows under `logs/dumps`.
+
 ## Runtime Files
 
 - `.env`: local secrets and behavior switches. Do not commit it.

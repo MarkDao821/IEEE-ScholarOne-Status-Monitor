@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
@@ -60,6 +61,14 @@ class ScholarOneScraper:
                     raise ScrapeError(f"ScholarOne login appears to have failed for {journal.name}")
                 _go_to_author_area(page)
                 rows = _extract_table_rows(page)
+                if debug:
+                    _save_debug_dump(
+                        page,
+                        rows,
+                        config.log_dir,
+                        journal.key,
+                        (journal.username, journal.password),
+                    )
                 records = parse_table_rows(journal, rows, page.url)
                 if not records:
                     raise ScrapeError(f"No manuscript status rows found for {journal.name}")
@@ -145,6 +154,41 @@ def _artifact_paths(log_dir: Path) -> tuple[Path, Path]:
     return (
         screenshots / f"failure-{stamp}-{suffix}.png",
         pages / f"failure-{stamp}-{suffix}.html",
+    )
+
+
+def _debug_dump_paths(log_dir: Path, journal_key: str) -> tuple[Path, Path, Path]:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
+    suffix = uuid4().hex[:8]
+    dumps = log_dir / "dumps"
+    dumps.mkdir(parents=True, exist_ok=True)
+    safe_key = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in journal_key)
+    base = f"{safe_key}-{stamp}-{suffix}"
+    return (
+        dumps / f"{base}.png",
+        dumps / f"{base}.html",
+        dumps / f"{base}.rows.json",
+    )
+
+
+def _save_debug_dump(
+    page: Page,
+    rows: list[list[str]],
+    log_dir: Path,
+    journal_key: str,
+    secrets: tuple[str, ...],
+) -> None:
+    screenshot_path, html_path, rows_path = _debug_dump_paths(log_dir, journal_key)
+    _clear_sensitive_inputs(page)
+    page.screenshot(path=str(screenshot_path), full_page=True)
+    html = page.content()
+    for secret in secrets:
+        if secret:
+            html = html.replace(secret, "[redacted]")
+    html_path.write_text(html, encoding="utf-8")
+    rows_path.write_text(
+        json.dumps(rows, ensure_ascii=False, indent=2),
+        encoding="utf-8",
     )
 
 
