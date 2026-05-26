@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import html
 from dataclasses import dataclass
 from types import TracebackType
 
@@ -24,26 +23,26 @@ def _redact_token(message: str, token: str) -> str:
 
 
 def _highlight(value: str) -> str:
-    safe_value = html.escape(value or "(unknown)")
-    return (
-        '<span style="color:#d93025; background-color:#fff2cc; '
-        'font-weight:700; padding:2px 4px; border-radius:3px;">'
-        f"{safe_value}</span>"
-    )
+    text = (value or "(unknown)").replace("`", "'").strip()
+    return f"**`{text}`**"
+
+
+def _join_fields(lines: list[str]) -> str:
+    return "\n\n".join(lines)
 
 
 def format_changes_message(changes: list[StatusChange]) -> str:
     parts: list[str] = []
     for change in changes:
         parts.append(
-            "\n".join(
+            _join_fields(
                 [
                     f"Journal: {change.journal_name}",
                     f"Change: {change.kind}",
                     f"Manuscript ID: {change.manuscript_id or '(unknown)'}",
-                    f"Title: {_highlight(change.title)}",
+                    f"**Title:** {_highlight(change.title)}",
                     f"Previous Status: {change.previous_status or '(none)'}",
-                    f"Current Status: {_highlight(change.current_status)}",
+                    f"**Current Status:** {_highlight(change.current_status)}",
                     f"Checked At: {change.checked_at}",
                     f"Submission System: {change.url}",
                 ]
@@ -60,12 +59,12 @@ def format_report_message(records: list[ManuscriptRecord]) -> str:
         if record.archived:
             continue
         parts.append(
-            "\n".join(
+            _join_fields(
                 [
                     f"Journal: {record.journal_name}",
                     f"Manuscript ID: {record.manuscript_id or '(unknown)'}",
-                    f"Title: {_highlight(record.title)}",
-                    f"Current Status: {_highlight(record.status)}",
+                    f"**Title:** {_highlight(record.title)}",
+                    f"**Current Status:** {_highlight(record.status)}",
                     f"Checked At: {record.checked_at}",
                     f"Submission System: {record.url}",
                 ]

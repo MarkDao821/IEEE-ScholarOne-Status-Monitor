@@ -47,10 +47,9 @@ def test_report_message_contains_current_status():
 
     assert "IEEE TCYB" in body
     assert "TCYB-2026-001" in body
-    assert 'Title: <span style="' in body
-    assert ">A Paper</span>" in body
-    assert 'Current Status: <span style="' in body
-    assert ">Under Review</span>" in body
+    assert "**Title:** **`A Paper`**" in body
+    assert "**Current Status:** **`Under Review`**" in body
+    assert "<span" not in body
 
 
 def test_report_message_renders_each_property_on_its_own_line():
@@ -72,7 +71,7 @@ def test_report_message_renders_each_property_on_its_own_line():
 
     assert "Journal: IEEE TCYB" in lines
     assert "Manuscript ID: TCYB-2026-001" in lines
-    assert any(line.startswith("Title: <span style=") and "A Paper</span>" in line for line in lines)
-    assert any(line.startswith("Current Status: <span style=") and "Under Review</span>" in line for line in lines)
+    assert "**Title:** **`A Paper`**" in lines
+    assert "**Current Status:** **`Under Review`**" in lines
     assert "Checked At: 2026-05-25T00:00:00+00:00" in lines
     assert "Submission System: https://example.test" in lines
