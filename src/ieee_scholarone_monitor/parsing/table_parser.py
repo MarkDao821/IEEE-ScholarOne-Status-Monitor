@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 from ..models import JournalAccount, ManuscriptRecord, utc_now
-from .status_rules import clean_text, has_status_signal, identity_title, is_terminal_status, normalize_title, status_score
+from .status_rules import clean_text, has_status_signal, identity_title, is_terminal_status, looks_like_date_token, normalize_title, status_score
 
 
 def parse_table_rows(
@@ -65,15 +65,14 @@ def _looks_like_manuscript_row(
 
 def _pick_manuscript_id(cells: list[str]) -> str:
     patterns = [
-        r"\b[A-Z]{1,10}[-_ ]?\d{2,}[-_A-Z0-9]*\b",
         r"\b\d{2}-[A-Z]{1,10}-\d{2,}[-_A-Z0-9]*\b",
+        r"\b[A-Z]{2,10}-[A-Z]-\d{4}-\d{1,2}-\d{2,}\b",
+        r"\b[A-Z]{2,10}[-_ ]?\d{2,}[-_A-Z0-9]*\b",
     ]
     for cell in cells:
-        if len(cell) > 80:
-            continue
         for pattern in patterns:
             match = re.search(pattern, cell, flags=re.IGNORECASE)
-            if match:
+            if match and not looks_like_date_token(match.group(0)):
                 return match.group(0)
     return ""
 
@@ -105,6 +104,8 @@ def _pick_title(cells: list[str], status: str) -> str:
         lowered = title.lower()
         if not title or lowered == status_lower:
             continue
+        if _is_internal_identifier_block(title):
+            continue
         if _looks_like_identifier(title):
             continue
         if has_status_signal(title):
@@ -121,6 +122,15 @@ def _looks_like_identifier(value: str) -> bool:
     if not re.search(r"\d", text):
         return False
     return bool(re.fullmatch(r"[A-Z0-9][A-Z0-9 _-]{2,60}", text, flags=re.IGNORECASE))
+
+
+def _is_internal_identifier_block(value: str) -> bool:
+    text = value.strip()
+    if "rex-prod" in text.lower():
+        return True
+    if re.search(r"\b[A-Z]{2,10}-[A-Z]-\d{4}-\d{1,2}-\d{2,}\b", text, flags=re.IGNORECASE):
+        return True
+    return False
 
 
 def _is_action_text(value: str) -> bool:

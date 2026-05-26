@@ -38,6 +38,7 @@ def _setup_logging(config: AppConfig) -> None:
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(message)s",
     )
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 def _default_scrape(journal: JournalAccount, config: AppConfig, debug: bool) -> list[ManuscriptRecord]:
