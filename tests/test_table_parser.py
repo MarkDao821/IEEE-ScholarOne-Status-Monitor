@@ -56,3 +56,25 @@ def test_parse_table_rows_ignores_date_tokens_and_internal_ids():
     assert records[0].manuscript_id == "CYB-E-2026-04-1672"
     assert records[0].title == "A careful paper about cybernetics"
     assert records[0].status == "Under Review"
+
+
+def test_parse_table_rows_uses_scholarone_headers_with_action_offset():
+    rows = [
+        ["STATUS", "ID", "TITLE", "CREATED", "SUBMITTED"],
+        [
+            "Contact Journal\n\nEIC: Shi, Peng\nADM: Lian, Zhi\n\n\n\tUnder Review",
+            "",
+            "Under Review",
+            "CYB-E-2026-04-1672 (REX-PROD-2-0641EBD9-09BF-4419-AE1E-AB2E25DFEE00-C67730BB-F4CF-4408-A62A-06A07DDBC8E1-99152)",
+            "Manifold Transfer Learning for Multitask Optimization\n View Submission\nSubmitting Author: Wang, Zijia",
+            "27-Apr-2026",
+            "27-Apr-2026",
+        ],
+    ]
+
+    records = parse_table_rows(_journal(), rows, "https://example.test", checked_at="now")
+
+    assert len(records) == 1
+    assert records[0].status == "Under Review"
+    assert records[0].manuscript_id == "CYB-E-2026-04-1672"
+    assert records[0].title == "Manifold Transfer Learning for Multitask Optimization"

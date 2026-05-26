@@ -14,11 +14,24 @@ def parse_table_rows(
 ) -> list[ManuscriptRecord]:
     checked = checked_at or utc_now()
     records_by_key: dict[str, ManuscriptRecord] = {}
+    headers: list[str] | None = None
 
     for raw_cells in rows:
         cells = [clean_text(cell) for cell in raw_cells if clean_text(cell)]
         if len(cells) < 2:
             continue
+        if _is_header_row(cells):
+            headers = [cell.strip().lower() for cell in cells]
+            continue
+
+        header_record = _record_from_headers(journal, headers, cells, page_url, checked)
+        if header_record is not None:
+            existing = records_by_key.get(header_record.identity)
+            records_by_key[header_record.identity] = (
+                _prefer_record(existing, header_record) if existing else header_record
+            )
+            continue
+
         joined = " | ".join(cells)
         if _looks_like_navigation_row(joined):
             continue
@@ -46,6 +59,52 @@ def parse_table_rows(
         records_by_key[key] = _prefer_record(existing, record) if existing else record
 
     return list(records_by_key.values())
+
+
+def _is_header_row(cells: list[str]) -> bool:
+    normalized = {cell.strip().lower() for cell in cells}
+    return {"status", "id", "title"}.issubset(normalized)
+
+
+def _record_from_headers(
+    journal: JournalAccount,
+    headers: list[str] | None,
+    cells: list[str],
+    page_url: str,
+    checked_at: str,
+) -> ManuscriptRecord | None:
+    if not headers:
+        return None
+
+    offset = max(0, len(cells) - len(headers))
+
+    def field(*names: str) -> str:
+        for name in names:
+            if name in headers:
+                index = headers.index(name) + offset
+                if 0 <= index < len(cells):
+                    return cells[index]
+        return ""
+
+    status_cell = field("status")
+    id_cell = field("id", "manuscript id", "manuscript")
+    title_cell = field("title")
+    status = _pick_status([status_cell], [status_cell]) or _pick_status(cells, cells)
+    manuscript_id = _pick_manuscript_id([id_cell]) or _pick_manuscript_id(cells)
+    title = normalize_title(title_cell) or _pick_title(cells, status)
+    if not _looks_like_manuscript_row(cells, manuscript_id, title, status):
+        return None
+
+    return ManuscriptRecord(
+        journal_key=journal.key,
+        journal_name=journal.name,
+        manuscript_id=manuscript_id,
+        title=title or "Untitled manuscript",
+        status=status or "Unknown",
+        url=page_url or journal.url,
+        checked_at=checked_at,
+        archived=is_terminal_status(status),
+    )
 
 
 def _looks_like_navigation_row(value: str) -> bool:
