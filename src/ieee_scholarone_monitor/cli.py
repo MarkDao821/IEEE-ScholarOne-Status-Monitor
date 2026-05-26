@@ -25,6 +25,7 @@ class _NotifierSender:
         result = self._notifier.send(title, body)
         if not result.ok:
             logging.error("Notification failed: %s", result.message)
+            raise RuntimeError(result.message)
 
     def close(self) -> None:
         self._notifier.close()
@@ -80,7 +81,11 @@ def run_test_notification(
     _setup_logging(config)
     sender = notifier or _default_notifier(config)
     try:
-        sender("IEEE ScholarOne Monitor Test", "WeChat notification is configured.")
+        try:
+            sender("IEEE ScholarOne Monitor Test", "WeChat notification is configured.")
+        except Exception:
+            logging.exception("Notification test failed")
+            return 1
     finally:
         close = getattr(sender, "close", None)
         if notifier is None and close is not None:
@@ -114,7 +119,11 @@ def run_check(
         body = format_changes_message(changes) if changes and not should_report else format_report_message(records)
         sender = notifier or _default_notifier(config)
         try:
-            sender(title, body)
+            try:
+                sender(title, body)
+            except Exception:
+                logging.exception("Notification failed")
+                return 1
         finally:
             close = getattr(sender, "close", None)
             if notifier is None and close is not None:
