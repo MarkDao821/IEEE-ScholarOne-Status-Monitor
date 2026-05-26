@@ -78,3 +78,5 @@ def test_parse_table_rows_uses_scholarone_headers_with_action_offset():
     assert records[0].status == "Under Review"
     assert records[0].manuscript_id == "CYB-E-2026-04-1672"
     assert records[0].title == "Manifold Transfer Learning for Multitask Optimization"
+    assert records[0].created_at == "27-Apr-2026"
+    assert records[0].submitted_at == "27-Apr-2026"

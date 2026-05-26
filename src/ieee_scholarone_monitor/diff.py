@@ -63,4 +63,6 @@ def _change(
         current_status=current_status,
         checked_at=record.checked_at,
         url=record.url,
+        created_at=record.created_at,
+        submitted_at=record.submitted_at,
     )

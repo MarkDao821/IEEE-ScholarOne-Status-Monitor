@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from types import TracebackType
 
 import httpx
@@ -24,7 +25,19 @@ def _redact_token(message: str, token: str) -> str:
 
 def _highlight(value: str) -> str:
     text = (value or "(unknown)").replace("`", "'").strip()
-    return f"**`{text}`**"
+    return f"```text\n{text}\n```"
+
+
+def _format_checked_at(value: str) -> str:
+    if not value:
+        return "(unknown)"
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return value
+    if parsed.tzinfo is not None:
+        parsed = parsed.astimezone(timezone(timedelta(hours=8)))
+    return parsed.strftime("%Y-%m-%d %H:%M:%S")
 
 
 def _join_fields(lines: list[str]) -> str:
@@ -40,10 +53,12 @@ def format_changes_message(changes: list[StatusChange]) -> str:
                     f"Journal: {change.journal_name}",
                     f"Change: {change.kind}",
                     f"Manuscript ID: {change.manuscript_id or '(unknown)'}",
-                    f"**Title:** {_highlight(change.title)}",
+                    f"**Title:**\n\n{_highlight(change.title)}",
                     f"Previous Status: {change.previous_status or '(none)'}",
-                    f"**Current Status:** {_highlight(change.current_status)}",
-                    f"Checked At: {change.checked_at}",
+                    f"**Current Status:**\n\n{_highlight(change.current_status)}",
+                    f"Created: {change.created_at or '(unknown)'}",
+                    f"Submitted: {change.submitted_at or '(unknown)'}",
+                    f"Checked At: {_format_checked_at(change.checked_at)}",
                     f"Submission System: {change.url}",
                 ]
             )
@@ -63,9 +78,11 @@ def format_report_message(records: list[ManuscriptRecord]) -> str:
                 [
                     f"Journal: {record.journal_name}",
                     f"Manuscript ID: {record.manuscript_id or '(unknown)'}",
-                    f"**Title:** {_highlight(record.title)}",
-                    f"**Current Status:** {_highlight(record.status)}",
-                    f"Checked At: {record.checked_at}",
+                    f"**Title:**\n\n{_highlight(record.title)}",
+                    f"**Current Status:**\n\n{_highlight(record.status)}",
+                    f"Created: {record.created_at or '(unknown)'}",
+                    f"Submitted: {record.submitted_at or '(unknown)'}",
+                    f"Checked At: {_format_checked_at(record.checked_at)}",
                     f"Submission System: {record.url}",
                 ]
             )

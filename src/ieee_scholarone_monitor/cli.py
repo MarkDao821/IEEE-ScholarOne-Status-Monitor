@@ -71,6 +71,8 @@ def _with_archive_flag(record: ManuscriptRecord) -> ManuscriptRecord:
         status=record.status,
         url=record.url,
         checked_at=record.checked_at,
+        created_at=record.created_at,
+        submitted_at=record.submitted_at,
         archived=is_terminal_status(record.status),
     )
 

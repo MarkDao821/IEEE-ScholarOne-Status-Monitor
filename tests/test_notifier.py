@@ -41,14 +41,19 @@ def test_report_message_contains_current_status():
                 status="Under Review",
                 url="https://example.test",
                 checked_at="2026-05-25T00:00:00+00:00",
+                created_at="27-Apr-2026",
+                submitted_at="28-Apr-2026",
             )
         ]
     )
 
     assert "IEEE TCYB" in body
     assert "TCYB-2026-001" in body
-    assert "**Title:** **`A Paper`**" in body
-    assert "**Current Status:** **`Under Review`**" in body
+    assert "**Title:**\n\n```text\nA Paper\n```" in body
+    assert "**Current Status:**\n\n```text\nUnder Review\n```" in body
+    assert "Created: 27-Apr-2026" in body
+    assert "Submitted: 28-Apr-2026" in body
+    assert "Checked At: 2026-05-25 08:00:00" in body
     assert "<span" not in body
 
 
@@ -63,6 +68,8 @@ def test_report_message_renders_each_property_on_its_own_line():
                 status="Under Review",
                 url="https://example.test",
                 checked_at="2026-05-25T00:00:00+00:00",
+                created_at="27-Apr-2026",
+                submitted_at="28-Apr-2026",
             )
         ]
     )
@@ -71,7 +78,11 @@ def test_report_message_renders_each_property_on_its_own_line():
 
     assert "Journal: IEEE TCYB" in lines
     assert "Manuscript ID: TCYB-2026-001" in lines
-    assert "**Title:** **`A Paper`**" in lines
-    assert "**Current Status:** **`Under Review`**" in lines
-    assert "Checked At: 2026-05-25T00:00:00+00:00" in lines
+    assert "**Title:**" in lines
+    assert "A Paper" in lines
+    assert "**Current Status:**" in lines
+    assert "Under Review" in lines
+    assert "Created: 27-Apr-2026" in lines
+    assert "Submitted: 28-Apr-2026" in lines
+    assert "Checked At: 2026-05-25 08:00:00" in lines
     assert "Submission System: https://example.test" in lines

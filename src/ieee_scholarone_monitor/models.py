@@ -44,6 +44,8 @@ class ManuscriptRecord:
     status: str
     url: str
     checked_at: str
+    created_at: str = ""
+    submitted_at: str = ""
     archived: bool = False
 
     @property
@@ -59,6 +61,8 @@ class ManuscriptRecord:
             "status": self.status,
             "url": self.url,
             "checked_at": self.checked_at,
+            "created_at": self.created_at,
+            "submitted_at": self.submitted_at,
             "archived": self.archived,
         }
 
@@ -72,6 +76,8 @@ class ManuscriptRecord:
             status=str(data.get("status", "")),
             url=str(data.get("url", "")),
             checked_at=str(data.get("checked_at", "")),
+            created_at=str(data.get("created_at", "")),
+            submitted_at=str(data.get("submitted_at", "")),
             archived=bool(data.get("archived", False)),
         )
 
@@ -113,3 +119,5 @@ class StatusChange:
     current_status: str
     checked_at: str
     url: str
+    created_at: str = ""
+    submitted_at: str = ""

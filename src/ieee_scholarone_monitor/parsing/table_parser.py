@@ -89,6 +89,8 @@ def _record_from_headers(
     status_cell = field("status")
     id_cell = field("id", "manuscript id", "manuscript")
     title_cell = field("title")
+    created_cell = field("created")
+    submitted_cell = field("submitted")
     status = _pick_status([status_cell], [status_cell]) or _pick_status(cells, cells)
     manuscript_id = _pick_manuscript_id([id_cell]) or _pick_manuscript_id(cells)
     title = normalize_title(title_cell) or _pick_title(cells, status)
@@ -103,6 +105,8 @@ def _record_from_headers(
         status=status or "Unknown",
         url=page_url or journal.url,
         checked_at=checked_at,
+        created_at=created_cell,
+        submitted_at=submitted_cell,
         archived=is_terminal_status(status),
     )
 
