@@ -47,4 +47,30 @@ def test_report_message_contains_current_status():
 
     assert "IEEE TCYB" in body
     assert "TCYB-2026-001" in body
-    assert "Under Review" in body
+    assert "**Title:** A Paper" in body
+    assert "**Current Status:** Under Review" in body
+
+
+def test_report_message_renders_each_property_on_its_own_line():
+    body = format_report_message(
+        [
+            ManuscriptRecord(
+                journal_key="ieee-tcyb",
+                journal_name="IEEE TCYB",
+                manuscript_id="TCYB-2026-001",
+                title="A Paper",
+                status="Under Review",
+                url="https://example.test",
+                checked_at="2026-05-25T00:00:00+00:00",
+            )
+        ]
+    )
+
+    lines = body.splitlines()
+
+    assert "Journal: IEEE TCYB" in lines
+    assert "Manuscript ID: TCYB-2026-001" in lines
+    assert "**Title:** A Paper" in lines
+    assert "**Current Status:** Under Review" in lines
+    assert "Checked At: 2026-05-25T00:00:00+00:00" in lines
+    assert "Submission System: https://example.test" in lines

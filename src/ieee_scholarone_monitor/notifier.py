@@ -31,9 +31,9 @@ def format_changes_message(changes: list[StatusChange]) -> str:
                     f"Journal: {change.journal_name}",
                     f"Change: {change.kind}",
                     f"Manuscript ID: {change.manuscript_id or '(unknown)'}",
-                    f"Title: {change.title or '(unknown)'}",
+                    f"**Title:** {change.title or '(unknown)'}",
                     f"Previous Status: {change.previous_status or '(none)'}",
-                    f"Current Status: {change.current_status or '(none)'}",
+                    f"**Current Status:** {change.current_status or '(none)'}",
                     f"Checked At: {change.checked_at}",
                     f"Submission System: {change.url}",
                 ]
@@ -54,8 +54,8 @@ def format_report_message(records: list[ManuscriptRecord]) -> str:
                 [
                     f"Journal: {record.journal_name}",
                     f"Manuscript ID: {record.manuscript_id or '(unknown)'}",
-                    f"Title: {record.title or '(unknown)'}",
-                    f"Current Status: {record.status or '(unknown)'}",
+                    f"**Title:** {record.title or '(unknown)'}",
+                    f"**Current Status:** {record.status or '(unknown)'}",
                     f"Checked At: {record.checked_at}",
                     f"Submission System: {record.url}",
                 ]
