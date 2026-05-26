@@ -85,3 +85,37 @@ def test_report_message_renders_each_property_on_its_own_line():
     assert "Submitted: 28-Apr-2026" in lines
     assert "Checked At: 2026-05-25 08:00:00" in lines
     assert "Submission System: https://example.test" in lines
+
+
+def test_report_message_includes_archived_table_records():
+    body = format_report_message(
+        [
+            ManuscriptRecord(
+                journal_key="ieee-tcyb",
+                journal_name="IEEE TCYB",
+                manuscript_id="CYB-E-2026-04-1672",
+                title="Manifold Transfer Learning for Multitask Optimization",
+                status="Under Review",
+                url="https://example.test",
+                checked_at="2026-05-26T08:00:00+00:00",
+                created_at="27-Apr-2026",
+                submitted_at="27-Apr-2026",
+            ),
+            ManuscriptRecord(
+                journal_key="ieee-tcyb",
+                journal_name="IEEE TCYB",
+                manuscript_id="CYB-E-2025-12-4642",
+                title="Manifold Transfer Learning for Multitask Optimization",
+                status="Reject & Resubmit (09-Mar-2026)",
+                url="https://example.test",
+                checked_at="2026-05-26T08:00:00+00:00",
+                created_at="20-Dec-2025",
+                submitted_at="20-Dec-2025",
+                archived=True,
+            ),
+        ]
+    )
+
+    assert "CYB-E-2026-04-1672" in body
+    assert "CYB-E-2025-12-4642" in body
+    assert "**Current Status:** `Reject & Resubmit (09-Mar-2026)`" in body

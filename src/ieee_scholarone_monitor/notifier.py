@@ -71,8 +71,6 @@ def format_report_message(records: list[ManuscriptRecord]) -> str:
         return "No active manuscripts found."
     parts: list[str] = []
     for record in records:
-        if record.archived:
-            continue
         parts.append(
             _join_fields(
                 [
@@ -87,7 +85,7 @@ def format_report_message(records: list[ManuscriptRecord]) -> str:
                 ]
             )
         )
-    return "\n\n---\n\n".join(parts) if parts else "No active manuscripts found."
+    return "\n\n---\n\n".join(parts)
 
 
 class PushPlusNotifier:
