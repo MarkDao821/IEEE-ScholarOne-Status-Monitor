@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 from dataclasses import dataclass
 from types import TracebackType
 
@@ -22,6 +23,15 @@ def _redact_token(message: str, token: str) -> str:
     return message.replace(token, "[redacted]") if token else message
 
 
+def _highlight(value: str) -> str:
+    safe_value = html.escape(value or "(unknown)")
+    return (
+        '<span style="color:#d93025; background-color:#fff2cc; '
+        'font-weight:700; padding:2px 4px; border-radius:3px;">'
+        f"{safe_value}</span>"
+    )
+
+
 def format_changes_message(changes: list[StatusChange]) -> str:
     parts: list[str] = []
     for change in changes:
@@ -31,9 +41,9 @@ def format_changes_message(changes: list[StatusChange]) -> str:
                     f"Journal: {change.journal_name}",
                     f"Change: {change.kind}",
                     f"Manuscript ID: {change.manuscript_id or '(unknown)'}",
-                    f"**Title:** {change.title or '(unknown)'}",
+                    f"Title: {_highlight(change.title)}",
                     f"Previous Status: {change.previous_status or '(none)'}",
-                    f"**Current Status:** {change.current_status or '(none)'}",
+                    f"Current Status: {_highlight(change.current_status)}",
                     f"Checked At: {change.checked_at}",
                     f"Submission System: {change.url}",
                 ]
@@ -54,8 +64,8 @@ def format_report_message(records: list[ManuscriptRecord]) -> str:
                 [
                     f"Journal: {record.journal_name}",
                     f"Manuscript ID: {record.manuscript_id or '(unknown)'}",
-                    f"**Title:** {record.title or '(unknown)'}",
-                    f"**Current Status:** {record.status or '(unknown)'}",
+                    f"Title: {_highlight(record.title)}",
+                    f"Current Status: {_highlight(record.status)}",
                     f"Checked At: {record.checked_at}",
                     f"Submission System: {record.url}",
                 ]
