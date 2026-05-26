@@ -25,7 +25,7 @@ def _redact_token(message: str, token: str) -> str:
 
 def _highlight(value: str) -> str:
     text = (value or "(unknown)").replace("`", "'").strip()
-    return f"```text\n{text}\n```"
+    return f"`{text}`"
 
 
 def _format_checked_at(value: str) -> str:
@@ -53,9 +53,9 @@ def format_changes_message(changes: list[StatusChange]) -> str:
                     f"Journal: {change.journal_name}",
                     f"Change: {change.kind}",
                     f"Manuscript ID: {change.manuscript_id or '(unknown)'}",
-                    f"**Title:**\n\n{_highlight(change.title)}",
+                    f"**Title:** {change.title or '(unknown)'}",
                     f"Previous Status: {change.previous_status or '(none)'}",
-                    f"**Current Status:**\n\n{_highlight(change.current_status)}",
+                    f"**Current Status:** {_highlight(change.current_status)}",
                     f"Created: {change.created_at or '(unknown)'}",
                     f"Submitted: {change.submitted_at or '(unknown)'}",
                     f"Checked At: {_format_checked_at(change.checked_at)}",
@@ -78,8 +78,8 @@ def format_report_message(records: list[ManuscriptRecord]) -> str:
                 [
                     f"Journal: {record.journal_name}",
                     f"Manuscript ID: {record.manuscript_id or '(unknown)'}",
-                    f"**Title:**\n\n{_highlight(record.title)}",
-                    f"**Current Status:**\n\n{_highlight(record.status)}",
+                    f"**Title:** {record.title or '(unknown)'}",
+                    f"**Current Status:** {_highlight(record.status)}",
                     f"Created: {record.created_at or '(unknown)'}",
                     f"Submitted: {record.submitted_at or '(unknown)'}",
                     f"Checked At: {_format_checked_at(record.checked_at)}",
