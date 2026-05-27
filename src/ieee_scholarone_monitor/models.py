@@ -33,6 +33,15 @@ class AppConfig:
     headless: bool
     status_path: Path
     log_dir: Path
+    browser_profile_dir: Path = Path("data/browser-profile")
+    challenge_timeout_seconds: int = 180
+    notify_provider: str = "wechat"
+    email_smtp_host: str = ""
+    email_smtp_port: int = 587
+    email_username: str = ""
+    email_password: str = field(default="", repr=False)
+    email_from: str = ""
+    email_to: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

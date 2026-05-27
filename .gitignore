@@ -6,3 +6,5 @@ __pycache__/
 data/
 logs/
 *.egg-info/
+journals.toml
+.pytest-*

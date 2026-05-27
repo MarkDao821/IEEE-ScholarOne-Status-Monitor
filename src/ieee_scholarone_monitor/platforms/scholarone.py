@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
@@ -42,6 +43,10 @@ class ScrapeError(RuntimeError):
     pass
 
 
+class SecurityChallengeRequired(ScrapeError):
+    pass
+
+
 class ScholarOneScraper:
     def scrape(
         self,
@@ -51,12 +56,26 @@ class ScholarOneScraper:
     ) -> list[ManuscriptRecord]:
         headless = config.headless and not debug
         with sync_playwright() as playwright:
-            browser = _launch_browser(playwright.chromium, headless=headless)
-            page = browser.new_page()
+            context = _launch_browser_context(
+                playwright.chromium,
+                config.browser_profile_dir / _safe_path_segment(journal.key),
+                headless=headless,
+            )
+            page = context.pages[0] if context.pages else context.new_page()
             try:
                 page.goto(journal.url, wait_until="domcontentloaded", timeout=60000)
+                _wait_for_security_challenge(
+                    page,
+                    headless=headless,
+                    timeout_seconds=config.challenge_timeout_seconds,
+                )
                 _fill_login(page, journal.username, journal.password)
                 page.wait_for_load_state("domcontentloaded", timeout=60000)
+                _wait_for_security_challenge(
+                    page,
+                    headless=headless,
+                    timeout_seconds=config.challenge_timeout_seconds,
+                )
                 if page.locator("input[type='password']").first.is_visible(timeout=3000):
                     raise ScrapeError(f"ScholarOne login appears to have failed for {journal.name}")
                 _go_to_author_area(page)
@@ -83,16 +102,75 @@ class ScholarOneScraper:
                     raise
                 raise ScrapeError(f"ScholarOne scrape failed for {journal.name}: {exc}") from exc
             finally:
-                browser.close()
+                context.close()
 
 
-def _launch_browser(chromium, headless: bool):
+def _launch_browser_context(chromium, user_data_dir: Path, headless: bool):
+    user_data_dir.mkdir(parents=True, exist_ok=True)
     try:
-        return chromium.launch(headless=headless)
+        return chromium.launch_persistent_context(
+            user_data_dir=str(user_data_dir),
+            headless=headless,
+        )
     except PlaywrightError as exc:
         if "Executable doesn't exist" not in str(exc):
             raise
-        return chromium.launch(channel="msedge", headless=headless)
+        return chromium.launch_persistent_context(
+            user_data_dir=str(user_data_dir),
+            channel="msedge",
+            headless=headless,
+        )
+
+
+def _safe_path_segment(value: str) -> str:
+    return re.sub(r"[^A-Za-z0-9_.-]+", "_", value).strip("._") or "journal"
+
+
+def _wait_for_security_challenge(
+    page: Page,
+    headless: bool,
+    timeout_seconds: int,
+) -> None:
+    if not _security_challenge_present(page):
+        return
+    if headless:
+        raise SecurityChallengeRequired(
+            "Cloudflare human verification is required. Run "
+            "'.\\.venv\\Scripts\\python.exe -m ieee_scholarone_monitor reauth' "
+            "to refresh the saved browser session."
+        )
+
+    deadline = datetime.now(timezone.utc).timestamp() + timeout_seconds
+    while _security_challenge_present(page):
+        if datetime.now(timezone.utc).timestamp() >= deadline:
+            raise SecurityChallengeRequired(
+                "Timed out waiting for Cloudflare human verification. "
+                "Complete the visible challenge or increase CHALLENGE_TIMEOUT_SECONDS."
+            )
+        page.wait_for_timeout(1000)
+    page.wait_for_load_state("domcontentloaded", timeout=60000)
+
+
+def _security_challenge_present(page: Page) -> bool:
+    try:
+        if page.locator(
+            "iframe[src*='challenges.cloudflare.com'], "
+            "input[name='cf-turnstile-response'], "
+            ".cf-turnstile"
+        ).count():
+            return True
+        content = page.content().lower()
+    except PlaywrightError:
+        return False
+    markers = (
+        "正在进行安全验证",
+        "请验证您是真人",
+        "verifying you are human",
+        "checking if the site connection is secure",
+        "challenge-platform",
+        "cloudflare ray id",
+    )
+    return any(marker in content for marker in markers)
 
 
 def _fill_login(page: Page, username: str, password: str) -> None:

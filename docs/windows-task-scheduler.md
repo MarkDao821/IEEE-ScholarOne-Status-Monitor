@@ -2,10 +2,12 @@
 
 Run these commands from an elevated PowerShell window.
 
+Replace `C:\path\to\ieee-scholarone-status-monitor` with your local project path.
+
 ## Daily 09:00 Report
 
 ```powershell
-$project = "D:\code\work\审稿状态推送\ieee-scholarone-status-monitor"
+$project = "C:\path\to\ieee-scholarone-status-monitor"
 $python = Join-Path $project ".venv\Scripts\python.exe"
 $action = New-ScheduledTaskAction -Execute $python -Argument "-m ieee_scholarone_monitor report" -WorkingDirectory $project
 $trigger = New-ScheduledTaskTrigger -Daily -At 9:00
@@ -17,7 +19,7 @@ Register-ScheduledTask -TaskName "IEEE ScholarOne Status Monitor" -Action $actio
 To check several times a day and notify only on changes, use `check` instead of `report`:
 
 ```powershell
-$project = "D:\code\work\审稿状态推送\ieee-scholarone-status-monitor"
+$project = "C:\path\to\ieee-scholarone-status-monitor"
 $python = Join-Path $project ".venv\Scripts\python.exe"
 $action = New-ScheduledTaskAction -Execute $python -Argument "-m ieee_scholarone_monitor check" -WorkingDirectory $project
 $trigger = New-ScheduledTaskTrigger -Daily -At 13:00
@@ -28,7 +30,7 @@ Register-ScheduledTask -TaskName "IEEE ScholarOne Change Check" -Action $action 
 
 ```powershell
 Start-ScheduledTask -TaskName "IEEE ScholarOne Status Monitor"
-Get-Content "D:\code\work\审稿状态推送\ieee-scholarone-status-monitor\logs\app.log" -Tail 80
+Get-Content (Join-Path "C:\path\to\ieee-scholarone-status-monitor" "logs\app.log") -Tail 80
 ```
 
 ## Temporary 1-Minute Test Trigger

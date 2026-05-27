@@ -51,6 +51,7 @@ def test_run_check_sends_baseline_then_suppresses_unchanged(tmp_path):
     assert run_check(config, scraper=_scraper, notifier=notifier) == 0
 
     assert len(sent) == 1
+    assert sent[0][0] == "IEEE ScholarOne Review Status Notification"
     assert "Under Review" in sent[0][1]
 
 
@@ -67,6 +68,7 @@ def test_report_mode_sends_current_status_even_when_unchanged(tmp_path):
     assert run_check(config, scraper=_scraper, notifier=notifier) == 0
 
     assert len(sent) == 1
+    assert sent[0][0] == "IEEE ScholarOne Review Status Notification"
     assert "A Paper" in sent[0][1]
     assert "Under Review" in sent[0][1]
 
@@ -79,4 +81,4 @@ def test_run_test_notification_sends_probe(tmp_path):
 
     assert run_test_notification(_config(tmp_path), notifier=notifier) == 0
 
-    assert sent == [("IEEE ScholarOne Monitor Test", "WeChat notification is configured.")]
+    assert sent == [("IEEE ScholarOne Monitor Test", "Notification is configured.")]
