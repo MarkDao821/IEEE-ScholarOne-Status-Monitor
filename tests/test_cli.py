@@ -1,3 +1,16 @@
+"""测试命令行主流程。
+
+测试什么：
+- 第一次检查时是否发送 baseline 通知。
+- 状态没有变化时 normal 模式是否不重复通知。
+- daily_report 模式是否每次都发送当前状态报告。
+- 测试通知命令是否能发送探测消息。
+
+需要填写什么：
+- 不需要填写真实 ScholarOne 账号或真实通知配置。
+- _config() 和 _scraper() 都使用合成数据，notifier 也只是把消息存进列表。
+"""
+
 from pathlib import Path
 
 from ieee_scholarone_monitor.cli import run_check, run_test_notification

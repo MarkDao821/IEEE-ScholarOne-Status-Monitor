@@ -1,3 +1,15 @@
+"""测试两次状态快照之间的差异判断。
+
+测试什么：
+- 第一次运行时是否生成 baseline 变化。
+- 稿件状态改变时是否识别为 status_changed。
+- 稿件新增或移除时是否识别为 added 或 removed。
+
+需要填写什么：
+- 不需要填写真实稿件信息。
+- 如果要新增场景，只需要在 _record() 里传入合成状态或合成稿件 ID。
+"""
+
 from ieee_scholarone_monitor.diff import diff_snapshots
 from ieee_scholarone_monitor.models import ManuscriptRecord, StatusSnapshot
 

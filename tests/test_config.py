@@ -1,3 +1,16 @@
+"""测试配置文件和环境变量的读取。
+
+测试什么：
+- 从 journals.toml 读取期刊账号配置。
+- 从环境变量读取微信或邮件通知配置。
+- 缺少必要配置或运行模式非法时是否报 ConfigError。
+
+需要填写什么：
+- 不需要填写真实账号、密码、token 或邮箱。
+- 测试会用 monkeypatch 临时设置假的环境变量，例如 TCYB_USERNAME。
+- 新增配置测试时，也请使用 example.test、example.com 和 fake credential。
+"""
+
 from pathlib import Path
 
 import pytest

@@ -1,3 +1,15 @@
+"""测试通知发送和通知内容格式。
+
+测试什么：
+- ServerChan Turbo 推送请求是否按预期组装。
+- 邮件通知是否能生成纯文本和 HTML 内容。
+- 日报和状态变更消息里是否包含正确的稿件信息。
+
+需要填写什么：
+- 不需要填写真实 SendKey、邮箱密码或收件人。
+- FakeClient 和 FakeSMTP 会拦截发送动作，测试不会真的发微信或邮件。
+"""
+
 import httpx
 
 from ieee_scholarone_monitor.notifier import (
