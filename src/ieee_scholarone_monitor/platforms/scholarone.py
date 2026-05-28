@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -93,11 +94,14 @@ class ScholarOneScraper:
                     raise ScrapeError(f"No manuscript status rows found for {journal.name}")
                 return records
             except Exception as exc:
-                _save_failure_artifacts(
-                    page,
-                    config.log_dir,
-                    (journal.username, journal.password),
-                )
+                try:
+                    _save_failure_artifacts(
+                        page,
+                        config.log_dir,
+                        (journal.username, journal.password),
+                    )
+                except Exception:
+                    logging.exception("Failed to save ScholarOne failure artifacts")
                 if isinstance(exc, ScrapeError):
                     raise
                 raise ScrapeError(f"ScholarOne scrape failed for {journal.name}: {exc}") from exc
@@ -282,9 +286,10 @@ def _save_failure_artifacts(page: Page, log_dir: Path, secrets: tuple[str, ...])
 
 
 def _clear_sensitive_inputs(page: Page) -> None:
-    page.locator("input[type='password']").evaluate_all(
-        "(inputs) => inputs.forEach((input) => { input.value = ''; })"
-    )
-    page.locator("input[type='text'], input[type='email']").evaluate_all(
-        "(inputs) => inputs.forEach((input) => { input.value = ''; })"
-    )
+    for selector in ("input[type='password']", "input[type='text'], input[type='email']"):
+        try:
+            page.locator(selector).evaluate_all(
+                "(inputs) => inputs.forEach((input) => { input.value = ''; })"
+            )
+        except PlaywrightError:
+            continue

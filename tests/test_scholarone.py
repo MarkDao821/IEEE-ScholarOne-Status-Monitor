@@ -9,10 +9,37 @@
 - 这里检查的是脚本文本本身，不会真的访问 ScholarOne。
 """
 
-from ieee_scholarone_monitor.platforms.scholarone import LOGIN_SUBMIT_SCRIPT
+from playwright.sync_api import Error as PlaywrightError
+
+from ieee_scholarone_monitor.platforms.scholarone import LOGIN_SUBMIT_SCRIPT, _save_failure_artifacts
 
 
 def test_login_script_submits_scholarone_form():
     assert "XIK_PREACT" in LOGIN_SUBMIT_SCRIPT
     assert "NEXT_PAGE" in LOGIN_SUBMIT_SCRIPT
     assert "form.submit()" in LOGIN_SUBMIT_SCRIPT
+
+
+class _NavigatingLocator:
+    def evaluate_all(self, script):
+        raise PlaywrightError("Execution context was destroyed")
+
+
+class _ArtifactPage:
+    def locator(self, selector):
+        return _NavigatingLocator()
+
+    def screenshot(self, path, full_page):
+        with open(path, "wb") as handle:
+            handle.write(b"png")
+
+    def content(self):
+        return "<input value='secret'>"
+
+
+def test_failure_artifacts_tolerate_navigation_during_redaction(tmp_path):
+    _save_failure_artifacts(_ArtifactPage(), tmp_path, ("secret",))
+
+    html_files = list((tmp_path / "pages").glob("failure-*.html"))
+    assert len(html_files) == 1
+    assert "secret" not in html_files[0].read_text(encoding="utf-8")
