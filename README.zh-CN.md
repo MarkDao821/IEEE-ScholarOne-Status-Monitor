@@ -6,9 +6,11 @@
 
 从投稿系统读取稿件状态，保存本地快照，并在首次建立基线或状态变化时通过微信或邮件推送通知。
 
-![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)![Playwright](https://img.shields.io/badge/Playwright-Chromium-45ba4b)![Notifications](https://img.shields.io/badge/Notify-ServerChan%20%7C%20PushPlus%20%7C%20Email-orange)![Platform](https://img.shields.io/badge/Platform-Windows%20friendly-blue)
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB) ![Playwright](https://img.shields.io/badge/Playwright-Chromium-45ba4b) ![Notifications](https://img.shields.io/badge/Notify-ServerChan%20%7C%20PushPlus%20%7C%20Email-orange) ![Platform](https://img.shields.io/badge/Platform-Windows%20friendly-blue)
 
 [English](README.md) | 中文
+
+</div>
 
 ## 功能
 

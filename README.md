@@ -6,9 +6,11 @@ A local status monitor for IEEE journals that use ScholarOne / Manuscript Centra
 
 It reads manuscript status rows, stores a local snapshot, and sends notifications through Server Chan Turbo, PushPlus, or email when a baseline or status change is detected.
 
-![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)![Playwright](https://img.shields.io/badge/Playwright-Chromium-45ba4b)![Notifications](https://img.shields.io/badge/Notify-ServerChan%20%7C%20PushPlus%20%7C%20Email-orange)![Platform](https://img.shields.io/badge/Platform-Windows%20friendly-blue)
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB) ![Playwright](https://img.shields.io/badge/Playwright-Chromium-45ba4b) ![Notifications](https://img.shields.io/badge/Notify-ServerChan%20%7C%20PushPlus%20%7C%20Email-orange) ![Platform](https://img.shields.io/badge/Platform-Windows%20friendly-blue)
 
 English | [中文](README.zh-CN.md)
+
+</div>
 
 ## Features
 
