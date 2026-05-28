@@ -6,14 +6,9 @@ A local status monitor for IEEE journals that use ScholarOne / Manuscript Centra
 
 It reads manuscript status rows, stores a local snapshot, and sends notifications through Server Chan Turbo, PushPlus, or email when a baseline or status change is detected.
 
-![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
-![Playwright](https://img.shields.io/badge/Playwright-Chromium-45ba4b)
-![Notifications](https://img.shields.io/badge/Notify-ServerChan%20%7C%20PushPlus%20%7C%20Email-orange)
-![Platform](https://img.shields.io/badge/Platform-Windows%20friendly-blue)
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)![Playwright](https://img.shields.io/badge/Playwright-Chromium-45ba4b)![Notifications](https://img.shields.io/badge/Notify-ServerChan%20%7C%20PushPlus%20%7C%20Email-orange)![Platform](https://img.shields.io/badge/Platform-Windows%20friendly-blue)
 
 English | [中文](README.zh-CN.md)
-
-</div>
 
 ## Features
 
@@ -207,11 +202,21 @@ CHALLENGE_TIMEOUT_SECONDS=180
 
 ## Scheduling
 
-See `docs/windows-task-scheduler.md` for Windows Task Scheduler commands.
+You can run the monitor on your own Windows machine or in GitHub Actions.
 
-Common options:
+| Method | Best for | Notes |
+| --- | --- | --- |
+| Windows Task Scheduler | Personal long-running use, browser session reuse, `check` runs that notify only on changes | Keeps local `data/status.json` and `data/browser-profile`, so it works better when ScholarOne needs a saved login session. |
+| GitHub Actions | Cloud-hosted daily `report` runs when direct login works without manual verification | Uses GitHub Secrets for `.env` and `journals.toml`. The runner is temporary, so generated files are not kept unless you add cache/artifact handling. |
 
-- run `report` once a day to send a current status report;
+Detailed guides:
+
+- [Windows Task Scheduler](docs/windows-task-scheduler.md)
+- [GitHub Actions scheduled reports](docs/github-actions-scheduling.md)
+
+Common command choices:
+
+- run `report` once a day to send a current status report.
 - run `check` several times a day and notify only on changes.
 
 ## Tests

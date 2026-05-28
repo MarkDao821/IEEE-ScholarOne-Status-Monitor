@@ -6,14 +6,9 @@
 
 从投稿系统读取稿件状态，保存本地快照，并在首次建立基线或状态变化时通过微信或邮件推送通知。
 
-![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
-![Playwright](https://img.shields.io/badge/Playwright-Chromium-45ba4b)
-![Notifications](https://img.shields.io/badge/Notify-ServerChan%20%7C%20PushPlus%20%7C%20Email-orange)
-![Platform](https://img.shields.io/badge/Platform-Windows%20friendly-blue)
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)![Playwright](https://img.shields.io/badge/Playwright-Chromium-45ba4b)![Notifications](https://img.shields.io/badge/Notify-ServerChan%20%7C%20PushPlus%20%7C%20Email-orange)![Platform](https://img.shields.io/badge/Platform-Windows%20friendly-blue)
 
 [English](README.md) | 中文
-
-</div>
 
 ## 功能
 
@@ -207,11 +202,17 @@ CHALLENGE_TIMEOUT_SECONDS=180
 
 ## 定时运行
 
-Windows 用户可以参考：
+可以在自己的 Windows 电脑上定时运行，也可以使用 GitHub Actions 在云端定时运行。
 
-```text
-docs/windows-task-scheduler.md
-```
+| 方式 | 适用场景 | 说明 |
+| --- | --- | --- |
+| Windows 任务计划程序 | 个人长期使用、需要复用浏览器会话、希望运行 `check` 并只在状态变化时通知 | 会保留本地 `data/status.json` 和 `data/browser-profile`，遇到 ScholarOne 登录会话或验证问题时更稳定。 |
+| GitHub Actions | 不想开本地电脑、希望云端每天固定运行 `report` 推送当前状态 | 使用 GitHub Secrets 保存 `.env` 和 `journals.toml`。运行机器是临时的，生成文件默认不会保存。 |
+
+详细说明：
+
+- [Windows 任务计划程序](docs/windows-task-scheduler.md)
+- [GitHub Actions 定时推送](docs/github-actions-scheduling.md)
 
 常见方式：
 
