@@ -45,4 +45,4 @@ jobs:
           '@ | Set-Content -Path journals.toml -Encoding utf8
 
       - name: Send scheduled report
-        run: python -m ieee_scholarone_monitor report
+        run: .\.venv\Scripts\python.exe -m ieee_scholarone_monitor reauth
