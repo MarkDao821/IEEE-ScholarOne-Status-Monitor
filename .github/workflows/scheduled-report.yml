@@ -44,5 +44,5 @@ jobs:
           ${{ secrets.JOURNALS_TOML }}
           '@ | Set-Content -Path journals.toml -Encoding utf8
 
-      - name: Send scheduled report
-        run: .\.venv\Scripts\python.exe -m ieee_scholarone_monitor reauth
+      - name: Send scheduled check
+        run: python -m ieee_scholarone_monitor check
