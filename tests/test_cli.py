@@ -13,7 +13,13 @@
 
 from pathlib import Path
 
-from ieee_scholarone_monitor.cli import run_check, run_test_notification
+import pytest
+
+from ieee_scholarone_monitor.cli import (
+    _send_notification_with_retries,
+    run_check,
+    run_test_notification,
+)
 from ieee_scholarone_monitor.models import AppConfig, JournalAccount, ManuscriptRecord
 
 
@@ -95,3 +101,27 @@ def test_run_test_notification_sends_probe(tmp_path):
     assert run_test_notification(_config(tmp_path), notifier=notifier) == 0
 
     assert sent == [("IEEE ScholarOne Monitor Test", "Notification is configured.")]
+
+
+def test_send_notification_with_retries_succeeds_after_transient_failure(monkeypatch):
+    monkeypatch.setattr("ieee_scholarone_monitor.cli.time.sleep", lambda *_: None)
+    calls: list[tuple[str, str]] = []
+
+    def flaky_notifier(title: str, body: str):
+        calls.append((title, body))
+        if len(calls) == 1:
+            raise RuntimeError("temporary failure")
+
+    _send_notification_with_retries(flaky_notifier, "Title", "Body", attempts=3, delay_seconds=0)
+
+    assert calls == [("Title", "Body"), ("Title", "Body")]
+
+
+def test_send_notification_with_retries_raises_after_all_attempts(monkeypatch):
+    monkeypatch.setattr("ieee_scholarone_monitor.cli.time.sleep", lambda *_: None)
+
+    def always_fails(_title: str, _body: str):
+        raise RuntimeError("still failing")
+
+    with pytest.raises(RuntimeError, match="still failing"):
+        _send_notification_with_retries(always_fails, "Title", "Body", attempts=2, delay_seconds=0)

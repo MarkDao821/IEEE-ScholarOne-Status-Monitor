@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import time
 from collections.abc import Callable
 
 from .config import ConfigError, load_config
@@ -131,6 +132,33 @@ def _notify_scrape_failure(config: AppConfig, error: Exception, notifier: Notify
             close()
 
 
+def _send_notification_with_retries(
+    sender: NotifyFunc,
+    title: str,
+    body: str,
+    attempts: int = 3,
+    delay_seconds: float = 1.0,
+) -> None:
+    last_error: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            sender(title, body)
+            return
+        except Exception as exc:
+            last_error = exc
+            if attempt == attempts:
+                break
+            logging.warning(
+                "Notification attempt %s/%s failed: %s",
+                attempt,
+                attempts,
+                exc,
+            )
+            time.sleep(delay_seconds)
+    assert last_error is not None
+    raise last_error
+
+
 def run_check(
     config: AppConfig,
     scraper: ScrapeFunc = _default_scrape,
@@ -162,7 +190,7 @@ def run_check(
         sender = notifier or _default_notifier(config)
         try:
             try:
-                sender(title, body)
+                _send_notification_with_retries(sender, title, body)
             except Exception:
                 logging.exception("Notification failed")
                 return 1
